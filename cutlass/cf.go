@@ -178,12 +178,22 @@ func CountBuildpack(language string, stack string) (int, error) {
 	if err != nil {
 		return -1, err
 	}
+
+	// Output columns are: 'position', 'name', 'stack', 'enabled', 'locked', 'filename'
 	for _, line := range strings.Split(string(lines), "\n") {
-		bpname := strings.SplitN(line, " ", 2)[0]
-		split := strings.Split(line, " ")
-		stackval := split[len(split)-1]
+		fields := strings.Fields(line)
+		// If there are fewer than three fields then it cannot be a valid buildpack line,
+		// as 'position', 'name', 'enabled', 'locked' are always present and have non-empty values.
+		if len(fields) < 3 {
+			continue
+		}
+		bpname := fields[1]
+		foundStack := fields[2]
 		if bpname == targetBpname {
-			if stack == "" || stack == stackval {
+			// If 'stack' is empty, there will be fewer fields and so the third field
+			// will be the value of 'enabled' i.e. "true". Put the length check in to guard against
+			// abnormal stack values.
+			if foundStack == stack || foundStack == "true" && len(fields) < 6 {
 				matches++
 			}
 		}
