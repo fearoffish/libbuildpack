@@ -335,18 +335,20 @@ func (a *App) PushNoStart() error {
 	}
 
 	command := exec.Command("cf", args...)
-	command.Stdout = DefaultStdoutStderr
-	command.Stderr = DefaultStdoutStderr
+	buf := &bytes.Buffer{}
+	command.Stdout = buf
+	command.Stderr = buf
 	if err := command.Run(); err != nil {
-		return err
+		return fmt.Errorf("err: %s\n\nlogs: %s", err, buf)
 	}
 
 	for k, v := range a.env {
 		command := exec.Command("cf", "set-env", a.Name, k, v)
-		command.Stdout = DefaultStdoutStderr
-		command.Stderr = DefaultStdoutStderr
+		buf := &bytes.Buffer{}
+		command.Stdout = buf
+		command.Stderr = buf
 		if err := command.Run(); err != nil {
-			return err
+			return fmt.Errorf("err: %s\n\nlogs: %s", err, buf)
 		}
 	}
 
@@ -374,12 +376,15 @@ func (a *App) V3Push() error {
 			args = append(args, "-b", buildpack)
 		}
 	}
+
 	command := exec.Command("cf", args...)
-	command.Stdout = DefaultStdoutStderr
-	command.Stderr = DefaultStdoutStderr
+	buf := &bytes.Buffer{}
+	command.Stdout = buf
+	command.Stderr = buf
 	if err := command.Run(); err != nil {
-		return err
+		return fmt.Errorf("err: %s\n\nlogs: %s", err, buf)
 	}
+
 	return nil
 }
 
