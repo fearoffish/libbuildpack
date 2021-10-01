@@ -50,7 +50,7 @@ type App struct {
 
 func New(fixture string) *App {
 	return &App{
-		Name:         filepath.Base(fixture) + "-" + RandStringRunes(20),
+		Name:         ensureValidAppName(filepath.Base(fixture) + "-" + RandStringRunes(20)),
 		Path:         fixture,
 		Stack:        os.Getenv("CF_STACK"),
 		Buildpacks:   []string{},
@@ -62,6 +62,10 @@ func New(fixture string) *App {
 		logCmd:       nil,
 		HealthCheck:  "",
 	}
+}
+
+func ensureValidAppName(name string) string {
+	return strings.ReplaceAll(name, ".", "-")
 }
 
 func ApiVersion() (string, error) {
